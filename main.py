@@ -9,7 +9,13 @@ from GPIOService import GPIOService
 
 logger = get_logger("main")
 config = get_config()
-client = None
+client = mqtt.Client()
+service = GPIOService(config["garages"])
+
+
+def extract_garage_id(topic: str) -> str:
+    return topic.split('/')[1]
+
 
 def on_connect(client, userdata, flags, rc):
     logger.debug("Connected with result code "+str(rc))
@@ -20,8 +26,12 @@ def on_connect(client, userdata, flags, rc):
     else:
         sys.exit()
 
-def on_message(client, userdata, msg):
-    print(msg.topic+" "+str(msg.payload))
+
+def on_message(client, userdata, msg: mqtt.MQTTMessage):
+    garage_id = extract_garage_id(msg.topic)
+    if msg.payload in [Payload.PAYLOAD_OPEN, Payload.PAYLOAD_STOP, Payload.PAYLOAD_CLOSE]:
+        service.trigger(garage_id)
+
 
 def on_disconnect(client, userdata,rc=0):
     logger.debug("DisConnected result code "+str(rc))
@@ -29,8 +39,6 @@ def on_disconnect(client, userdata,rc=0):
 
 
 if __name__ == '__main__':
-    service = GPIOService(config["garages"])
-    client = mqtt.Client()
     client.on_connect = on_connect
     client.on_disconnect = on_disconnect
     client.username_pw_set(username=config["mqtt"]["username"], password=config["mqtt"]["password"])

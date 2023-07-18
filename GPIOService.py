@@ -1,4 +1,5 @@
 import paho.mqtt.client as mqtt
+import time
 import RPi.GPIO as GPIO
 
 from enums import Topic, Payload
@@ -13,6 +14,7 @@ class GPIOService:
         self.previous_status = {}
         for garage in garages:
             GPIO.setup(garage['status'], GPIO.IN)
+            GPIO.setup(garage['control'], GPIO.OUT)
             self.previous_status[garage["id"]] = None
 
     def reset_polling(self):
@@ -31,3 +33,11 @@ class GPIOService:
             status = GPIO.input(garage['status'])
             if status != self.previous_status[garage["id"]]:
                 self.update_master(garage, status, client)
+
+    def trigger(self, garage_id: str):
+        for garage in self.garages:
+            if garage["id"] == garage_id:
+                GPIO.output(garage['control'], GPIO.HIGH)
+                GPIO.output(garage['control'], GPIO.LOW)
+                time.sleep(0.5)
+                GPIO.output(garage['control'], GPIO.HIGH)
