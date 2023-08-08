@@ -3,9 +3,11 @@ import time
 import RPi.GPIO as GPIO
 
 from enums import Topic, Payload
+from logger import get_logger
 
 POLLING_BEFORE_RESET = 600
 
+logger = get_logger("GPIOService")
 
 class GPIOService:
     def __init__(self, garages):
@@ -13,8 +15,10 @@ class GPIOService:
         self.polling = 0
         self.previous_status = {}
         for garage in garages:
+            GPIO.setmode(GPIO.BCM)
             GPIO.setup(garage['status'], GPIO.IN)
             GPIO.setup(garage['control'], GPIO.OUT)
+            GPIO.output(garage['control'], GPIO.HIGH)
             self.previous_status[garage["id"]] = None
 
     def reset_polling(self):
@@ -22,7 +26,7 @@ class GPIOService:
             self.previous_status[garage["id"]] = None
 
     def update_master(self, garage, status, client: mqtt.Client):
-        client.publish(Topic.STATE_TOPIC.format(garage["id"]), Payload.STATE_OPEN if status == 0 else Payload.STATE_CLOSED)
+        client.publish(Topic.STATE_TOPIC.format(garage["id"]), Payload.STATE_OPEN if status == 1 else Payload.STATE_CLOSED, retain=True, qos=2)
         self.previous_status[garage["id"]] = status
 
     def check_and_publish(self, client: mqtt.Client):
@@ -41,3 +45,4 @@ class GPIOService:
                 GPIO.output(garage['control'], GPIO.LOW)
                 time.sleep(0.5)
                 GPIO.output(garage['control'], GPIO.HIGH)
+                break
