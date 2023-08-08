@@ -32,8 +32,8 @@ def on_connect(client, userdata, flags, rc):
 
 def on_message(client, userdata, msg: mqtt.MQTTMessage):
     garage_id = extract_garage_id(msg.topic)
-    if msg.payload.decode("utf-8") in [Payload.PAYLOAD_OPEN, Payload.PAYLOAD_STOP, Payload.PAYLOAD_CLOSE]:
-        service.trigger(garage_id)
+    if msg.payload.decode("utf-8") in [Payload.PAYLOAD_OPEN, Payload.PAYLOAD_CLOSE]:
+        service.trigger(garage_id, msg.payload.decode("utf-8"))
 
 def on_disconnect(client, userdata,rc=0):
     logger.debug("DisConnected result code "+str(rc))

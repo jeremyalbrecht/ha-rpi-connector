@@ -1,5 +1,8 @@
 from enum import Enum
 
+class Status(int, Enum):
+    OPEN = 1
+    CLOSED = 0
 
 class Topic(str, Enum):
     AVAILABILITY_TOPIC = "garage/{}/availability"

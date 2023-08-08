@@ -2,7 +2,7 @@ import paho.mqtt.client as mqtt
 import time
 import RPi.GPIO as GPIO
 
-from enums import Topic, Payload
+from enums import Topic, Payload, Status
 from logger import get_logger
 
 POLLING_BEFORE_RESET = 600
@@ -26,7 +26,7 @@ class GPIOService:
             self.previous_status[garage["id"]] = None
 
     def update_master(self, garage, status, client: mqtt.Client):
-        client.publish(Topic.STATE_TOPIC.format(garage["id"]), Payload.STATE_OPEN if status == 1 else Payload.STATE_CLOSED, retain=True, qos=2)
+        client.publish(Topic.STATE_TOPIC.format(garage["id"]), Payload.STATE_OPEN if status == Status.OPEN else Payload.STATE_CLOSED, retain=True, qos=2)
         self.previous_status[garage["id"]] = status
 
     def check_and_publish(self, client: mqtt.Client):
@@ -38,11 +38,14 @@ class GPIOService:
             if status != self.previous_status[garage["id"]]:
                 self.update_master(garage, status, client)
 
-    def trigger(self, garage_id: str):
+    def trigger(self, garage_id: str, order: Topic, client: mqtt.Client):
         for garage in self.garages:
             if garage["id"] == garage_id:
-                GPIO.output(garage['control'], GPIO.HIGH)
-                GPIO.output(garage['control'], GPIO.LOW)
-                time.sleep(0.5)
-                GPIO.output(garage['control'], GPIO.HIGH)
+                if (self.previous_status[garage["id"]] == Status.OPEN and order == Payload.PAYLOAD_CLOSE) or \
+                    (self.previous_status[garage["id"]] == Status.CLOSED and order == Payload.PAYLOAD_OPEN):
+                    GPIO.output(garage['control'], GPIO.HIGH)
+                    GPIO.output(garage['control'], GPIO.LOW)
+                    time.sleep(0.5)
+                    GPIO.output(garage['control'], GPIO.HIGH)
+                    client.publish(Topic.STATE_TOPIC.format(garage["id"]), Payload.STATE_OPENING if self.previous_status[garage["id"]] == Status.CLOSED else Payload.STATE_CLOSING, retain=True, qos=2)
                 break
