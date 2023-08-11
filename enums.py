@@ -1,13 +1,29 @@
 from enum import Enum
 
+
+class GPIOType(str, Enum):
+    INPUT = "input"
+    OUTPUT = "output"
+
+
+class GPIOState(str, Enum):
+    HIGH = "high"
+    LOW = "low"
+
+
 class Status(int, Enum):
     OPEN = 1
     CLOSED = 0
 
+
+class DeviceClass(str, Enum):
+    GARAGE = "garage"
+    MOTION = "motion"
+
 class Topic(str, Enum):
-    AVAILABILITY_TOPIC = "garage/{}/availability"
-    COMMAND_TOPIC = "garage/{}/set"
-    STATE_TOPIC = "garage/{}/status"
+    AVAILABILITY_TOPIC = "{class}/{id}/availability"
+    COMMAND_TOPIC = "{class}/{id}/set"
+    STATE_TOPIC = "{class}/{id}/status"
 
 
 class Payload(str, Enum):
