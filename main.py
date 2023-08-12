@@ -32,7 +32,7 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg: mqtt.MQTTMessage):
     device_id = extract_id(msg.topic)
     if msg.payload.decode("utf-8") in [Payload.PAYLOAD_OPEN, Payload.PAYLOAD_CLOSE]:
-        service.trigger(device_id, msg.payload.decode("utf-8"))
+        service.trigger(device_id, msg.payload.decode("utf-8"), client)
 
 def on_disconnect(client, userdata,rc=0):
     logger.debug("DisConnected result code "+str(rc))
