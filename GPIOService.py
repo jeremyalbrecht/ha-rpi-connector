@@ -1,3 +1,5 @@
+import json
+
 import paho.mqtt.client as mqtt
 import time
 import RPi.GPIO as GPIO
@@ -66,10 +68,27 @@ class GPIOService:
                                        Payload.STATE_OPENING if self.previous_status[device["id"]] == Status.CLOSED else Payload.STATE_CLOSING, retain=True, qos=2)
                         device["no_update_before"] = time.time() + 10
                         self.reset_polling()
-            elif device["class"] == DeviceClass.SIREN or device["class"] == DeviceClass.LIGHT:
+
+    def triggerJSON(self, device_id: str, order: str, client: mqtt.Client):
+        device = [d for d in self.devices if d["id"] == device_id]
+        message = json.loads(order)
+        if len(device) == 1:
+            device = device[0]
+            if device["class"] == DeviceClass.SIREN:
                 control_pin = [gpio for gpio in device["gpio"] if gpio["name"] == "control"]
                 if len(control_pin) == 1:
                     control_pin = control_pin[0]
-                    GPIO.output(control_pin["gpio"], GPIO.HIGH if order == Payload.PAYLOAD_OPEN else GPIO.LOW)
+                    GPIO.output(control_pin["gpio"], GPIO.HIGH if message["state"] == Payload.PAYLOAD_OPEN else GPIO.LOW)
                     client.publish(Topic.STATE_TOPIC.format(device["class"], device["id"]),
-                                   Payload.STATE_OPEN if order == Payload.PAYLOAD_OPEN else Payload.STATE_CLOSED, retain=True, qos=2)
+                                   Payload.STATE_OPEN if message["order"] == Payload.PAYLOAD_OPEN else Payload.STATE_CLOSED,
+                                   retain=True, qos=2)
+            elif device["class"] == DeviceClass.LIGHT:
+                control_pin = [gpio for gpio in device["gpio"] if gpio["name"] == "control"]
+                if len(control_pin) == 1:
+                    control_pin = control_pin[0]
+                    GPIO.output(control_pin["gpio"],
+                                GPIO.HIGH if message["state"] == Payload.PAYLOAD_OPEN else GPIO.LOW)
+                    client.publish(Topic.STATE_TOPIC.format(device["class"], device["id"]),
+                                   Payload.STATE_OPEN if message[
+                                                             "order"] == Payload.PAYLOAD_OPEN else Payload.STATE_CLOSED,
+                                   retain=True, qos=2)

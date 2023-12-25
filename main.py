@@ -1,9 +1,9 @@
 import sys
 import time
 import os
+import socket
 
 import paho.mqtt.client as mqtt
-import yaml
 from logger import get_logger
 from config import get_config
 from enums import Topic, Payload
@@ -12,7 +12,7 @@ from mqttService import mqttService
 
 logger = get_logger("main")
 config = get_config()
-client = mqtt.Client(client_id="pi3-garage", clean_session=False)
+client = mqtt.Client(client_id=socket.gethostname(), clean_session=False)
 service = GPIOService(config["devices"])
 mqtt_service = mqttService(config["devices"])
 
@@ -33,6 +33,8 @@ def on_message(client, userdata, msg: mqtt.MQTTMessage):
     device_id = extract_id(msg.topic)
     if msg.payload.decode("utf-8") in [Payload.PAYLOAD_OPEN, Payload.PAYLOAD_CLOSE]:
         service.trigger(device_id, msg.payload.decode("utf-8"), client)
+    else:
+        service.triggerJSON(device_id, msg.payload.decode("utf-8"), client)
 
 def on_disconnect(client, userdata,rc=0):
     logger.debug("DisConnected result code "+str(rc))
