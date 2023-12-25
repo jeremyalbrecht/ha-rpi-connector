@@ -29,6 +29,8 @@ class Topic(str, Enum):
 
 
 class Payload(str, Enum):
+    OFF = "OFF"
+    ON = "ON"
     PAYLOAD_OPEN = "OPEN"
     PAYLOAD_CLOSE = "CLOSE"
     PAYLOAD_STOP = "STOP"

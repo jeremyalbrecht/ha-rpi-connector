@@ -87,7 +87,7 @@ class GPIOService:
                 if len(control_pin) == 1:
                     control_pin = control_pin[0]
                     GPIO.output(control_pin["gpio"],
-                                GPIO.HIGH if message["state"] == Payload.PAYLOAD_OPEN else GPIO.LOW)
+                                GPIO.HIGH if message["state"] == Payload.ON else GPIO.LOW)
                     client.publish(Topic.STATE_TOPIC.format(device["class"], device["id"]),
-                                   Payload.STATE_OPEN if message["state"] == Payload.PAYLOAD_OPEN else Payload.STATE_CLOSED,
+                                   "{\"state\": {}}".format(Payload.ON if message["state"] == Payload.ON else Payload.OFF),
                                    retain=True, qos=2)
