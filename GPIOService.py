@@ -41,12 +41,12 @@ class GPIOService:
             self.reset_polling()
         for device in self.devices:
             status_pin = [gpio for gpio in device["gpio"] if gpio["name"] == "status"]
-            if "no_update_before" in device and time.time() <= device["no_update_before"]:
-                continue
             if len(status_pin) == 1:
                 status_pin = status_pin[0]
                 status = GPIO.input(status_pin["gpio"])
                 if status != self.previous_status[device["id"]]:
+                    if status == 0 and "no_update_before" in device and time.time() <= device["no_update_before"]:
+                        continue
                     device["no_update_before"] = time.time() + 30
                     self.update_master(device, status, client)
 
@@ -88,6 +88,9 @@ class GPIOService:
                     control_pin = control_pin[0]
                     GPIO.output(control_pin["gpio"],
                                 GPIO.HIGH if message["state"] == Payload.ON else GPIO.LOW)
+                    status = {
+                        "state": Payload.ON if message["state"] == Payload.ON else Payload.OFF
+                    }
                     client.publish(Topic.STATE_TOPIC.format(device["class"], device["id"]),
-                                   "{\"state\": {}}".format(Payload.ON if message["state"] == Payload.ON else Payload.OFF),
+                                   json.dumps(status),
                                    retain=True, qos=2)
