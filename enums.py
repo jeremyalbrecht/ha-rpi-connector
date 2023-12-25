@@ -19,6 +19,8 @@ class Status(int, Enum):
 class DeviceClass(str, Enum):
     GARAGE = "garage"
     MOTION = "motion"
+    SIREN = "siren"
+    LIGHT = "light"
 
 class Topic(str, Enum):
     AVAILABILITY_TOPIC = "{}/{}/availability"

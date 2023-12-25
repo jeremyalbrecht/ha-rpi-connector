@@ -39,13 +39,16 @@ class GPIOService:
             self.reset_polling()
         for device in self.devices:
             status_pin = [gpio for gpio in device["gpio"] if gpio["name"] == "status"]
+            if "no_update_before" in device and time.time() <= device["no_update_before"]:
+                continue
             if len(status_pin) == 1:
                 status_pin = status_pin[0]
                 status = GPIO.input(status_pin["gpio"])
                 if status != self.previous_status[device["id"]]:
+                    device["no_update_before"] = time.time() + 30
                     self.update_master(device, status, client)
 
-    def trigger(self, device_id: str, order: Topic, client: mqtt.Client):
+    def trigger(self, device_id: str, order: Payload, client: mqtt.Client):
         device = [d for d in self.devices if d["id"] == device_id]
         if len(device) == 1:
             device = device[0]
@@ -61,4 +64,12 @@ class GPIOService:
                         GPIO.output(control_pin["gpio"], GPIO.HIGH)
                         client.publish(Topic.STATE_TOPIC.format(DeviceClass.GARAGE, device["id"]),
                                        Payload.STATE_OPENING if self.previous_status[device["id"]] == Status.CLOSED else Payload.STATE_CLOSING, retain=True, qos=2)
+                        device["no_update_before"] = time.time() + 10
                         self.reset_polling()
+            elif device["class"] == DeviceClass.SIREN or device["class"] == DeviceClass.LIGHT:
+                control_pin = [gpio for gpio in device["gpio"] if gpio["name"] == "control"]
+                if len(control_pin) == 1:
+                    control_pin = control_pin[0]
+                    GPIO.output(control_pin["gpio"], GPIO.HIGH if order == Payload.PAYLOAD_OPEN else GPIO.LOW)
+                    client.publish(Topic.STATE_TOPIC.format(device["class"], device["id"]),
+                                   Payload.STATE_OPEN if order == Payload.PAYLOAD_OPEN else Payload.STATE_CLOSED, retain=True, qos=2)
