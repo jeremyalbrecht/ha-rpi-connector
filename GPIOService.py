@@ -80,7 +80,7 @@ class GPIOService:
                     control_pin = control_pin[0]
                     GPIO.output(control_pin["gpio"], GPIO.HIGH if message["state"] == Payload.PAYLOAD_OPEN else GPIO.LOW)
                     client.publish(Topic.STATE_TOPIC.format(device["class"], device["id"]),
-                                   Payload.STATE_OPEN if message["order"] == Payload.PAYLOAD_OPEN else Payload.STATE_CLOSED,
+                                   Payload.STATE_OPEN if message["state"] == Payload.PAYLOAD_OPEN else Payload.STATE_CLOSED,
                                    retain=True, qos=2)
             elif device["class"] == DeviceClass.LIGHT:
                 control_pin = [gpio for gpio in device["gpio"] if gpio["name"] == "control"]
@@ -89,6 +89,5 @@ class GPIOService:
                     GPIO.output(control_pin["gpio"],
                                 GPIO.HIGH if message["state"] == Payload.PAYLOAD_OPEN else GPIO.LOW)
                     client.publish(Topic.STATE_TOPIC.format(device["class"], device["id"]),
-                                   Payload.STATE_OPEN if message[
-                                                             "order"] == Payload.PAYLOAD_OPEN else Payload.STATE_CLOSED,
+                                   Payload.STATE_OPEN if message["state"] == Payload.PAYLOAD_OPEN else Payload.STATE_CLOSED,
                                    retain=True, qos=2)
