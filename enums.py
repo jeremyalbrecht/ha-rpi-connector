@@ -21,9 +21,9 @@ class DeviceClass(str, Enum):
     MOTION = "motion"
 
 class Topic(str, Enum):
-    AVAILABILITY_TOPIC = "{class}/{id}/availability"
-    COMMAND_TOPIC = "{class}/{id}/set"
-    STATE_TOPIC = "{class}/{id}/status"
+    AVAILABILITY_TOPIC = "{}/{}/availability"
+    COMMAND_TOPIC = "{}/{}/set"
+    STATE_TOPIC = "{}/{}/status"
 
 
 class Payload(str, Enum):
