@@ -40,14 +40,14 @@ class GPIOService:
         if self.polling > POLLING_BEFORE_RESET:
             self.reset_polling()
         for device in self.devices:
+            if "grace" in device and "no_update_before" in device and time.time() <= device["no_update_before"]:
+                continue
             status_pin = [gpio for gpio in device["gpio"] if gpio["name"] == "status"]
             if len(status_pin) == 1:
                 status_pin = status_pin[0]
                 status = GPIO.input(status_pin["gpio"])
                 if status != self.previous_status[device["id"]]:
-                    if status == 0 and "no_update_before" in device and time.time() <= device["no_update_before"]:
-                        continue
-                    device["no_update_before"] = time.time() + 30
+                    device["no_update_before"] = time.time() + device["grace"]
                     self.update_master(device, status, client)
 
     def trigger(self, device_id: str, order: Payload, client: mqtt.Client):
