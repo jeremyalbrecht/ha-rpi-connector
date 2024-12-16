@@ -1,63 +1,56 @@
-import sys
-import time
-import os
-import socket
+import yaml
+from gpio_service import GPIOService
+from mqtt_service import MQTTService
+from device_garage import GarageDevice
 
-import paho.mqtt.client as mqtt
-from logger import get_logger
-from config import get_config
-from enums import Topic, Payload
-from GPIOService import GPIOService
-from mqttService import mqttService
-
-logger = get_logger("main")
-config = get_config()
-client = mqtt.Client(client_id=socket.gethostname(), clean_session=False)
-service = GPIOService(config["devices"])
-mqtt_service = mqttService(config["devices"])
+from utils.config import get_config
+from utils.logger import get_logger
+from utils.payload_loader import PayloadLoader
 
 
-def extract_id(topic: str) -> str:
-    return int(topic.split('/')[1])
+def main():
+    logger = get_logger("main")
+    config = get_config()
+    PayloadLoader.load_payloads()
+    gpio_service = GPIOService(devices=config["devices"], mock_gpio=config.get("mock_gpio", False))
 
-
-def on_connect(client, userdata, flags, rc):
-    logger.debug("Connected with result code "+str(rc))
-    if rc == 0:
-        mqtt_service.mark_online(client)
-    else:
-        sys.exit()
-
-
-def on_message(client, userdata, msg: mqtt.MQTTMessage):
-    device_id = extract_id(msg.topic)
-    if msg.payload.decode("utf-8") in [Payload.PAYLOAD_OPEN, Payload.PAYLOAD_CLOSE]:
-        service.trigger(device_id, msg.payload.decode("utf-8"), client)
-    else:
-        service.triggerJSON(device_id, msg.payload.decode("utf-8"), client)
-
-def on_disconnect(client, userdata,rc=0):
-    logger.debug("DisConnected result code "+str(rc))
-
-
-if __name__ == '__main__':
     try:
-        client.on_connect = on_connect
-        client.on_disconnect = on_disconnect
-        client.on_message = on_message
-        client.username_pw_set(username=config["mqtt"]["username"], password=config["mqtt"]["password"])
-        client.connect(config["mqtt"]["host"], 1883, 60)
+        # Initialize MQTT Service
+        mqtt_service = MQTTService(
+            host=config["mqtt"]["host"],
+            port=config["mqtt"]["port"],
+            username=config["mqtt"]["username"],
+            password=config["mqtt"]["password"],
+            devices=[],
+            interval=10
+        )
 
-        client.loop_start()
+        # Create devices
+        devices = []
+        for device_config in config["devices"]:
+            if device_config["class"] == "garage":
+                device = GarageDevice(
+                    device_id=device_config["id"],
+                    device_class="garage",
+                    gpio_service=gpio_service,
+                    on_state_change=None,  # Set later by MQTTService
+                )
+                mqtt_service.register_device_state_change_callback(device)
+                devices.append(device)
+
+        mqtt_service.devices = devices
+
+        mqtt_service.start()
+
+        # Keep the program running
         while True:
-            service.check_and_publish(client)
-            time.sleep(1)
-    except KeyboardInterrupt:
-        mqtt_service.mark_offline(client)
-        client.disconnect()
-        client.loop_stop()
-        try:
-            sys.exit(130)
-        except SystemExit:
-            os._exit(130)
+            pass
 
+    except KeyboardInterrupt:
+        logger.info("Shutting down services.")
+        mqtt_service.stop()
+        gpio_service.cleanup()
+
+
+if __name__ == "__main__":
+    main()

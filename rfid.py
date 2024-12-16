@@ -7,8 +7,8 @@ import RPi.GPIO as GPIO
 from pirc522 import RFID
 import paho.mqtt.client as mqtt
 
-from logger import get_logger
-from config import get_config
+from utils.logger import get_logger
+from utils.config import get_config
 
 
 logger = get_logger("rfid")

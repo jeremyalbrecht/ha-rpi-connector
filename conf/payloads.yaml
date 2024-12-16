@@ -1,0 +1,16 @@
+garage:
+  open: "OPEN"
+  close: "CLOSE"
+  stop: "STOP"
+  state_open: "open"
+  state_opening: "opening"
+  state_closed: "closed"
+  state_closing: "closing"
+
+availability:
+  online: "online"
+  offline: "offline"
+
+light:
+  on: "ON"
+  off: "OFF"
