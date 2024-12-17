@@ -1,10 +1,8 @@
-import RPi.GPIO as GPIO
-from enums.gpio_enums import GPIOType, Status, GPIOState
-from devices.base_device import BaseDevice
-from utils.payload_loader import PayloadLoader
+from src.devices.base_device import BaseDevice
+from src.utils.payload_loader import PayloadLoader
 
 
-class GarageDevice(BaseDevice):
+class MotionDevice(BaseDevice):
 
     def handle_command(self, command: str):
         """Handle garage-specific commands like open/close."""

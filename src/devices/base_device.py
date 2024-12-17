@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from gpio_service import GPIOService
 
 
 class BaseDevice(ABC):

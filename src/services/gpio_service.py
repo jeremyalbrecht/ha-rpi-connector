@@ -2,7 +2,7 @@ import logging
 import time
 from typing import Dict, List
 
-from enums.gpio_enums import GPIOType, GPIOState
+from src.enums.gpio_enums import GPIOType, GPIOState
 
 try:
     import RPi.GPIO as GPIO
