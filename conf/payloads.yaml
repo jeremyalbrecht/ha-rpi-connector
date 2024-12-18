@@ -14,3 +14,7 @@ availability:
 light:
   on: "ON"
   off: "OFF"
+
+motion:
+  free: "free"
+  detected: "detected"

@@ -1,19 +1,17 @@
 from src.devices.base_device import BaseDevice
+from src.enums.gpio_enums import GPIOState
+from src.services.gpio_service import GPIOService
 from src.utils.payload_loader import PayloadLoader
 
 
 class MotionDevice(BaseDevice):
 
-    def handle_command(self, command: str):
-        """Handle garage-specific commands like open/close."""
-        if command in [PayloadLoader.get("garage", "open"),
-                       PayloadLoader.get("garage", "close")]:
-            self.toggle_control("control")
-            self.notify_state_change("opening")
-        else:
-            raise ValueError(f"Unknown command '{command}' for GarageDevice {self.device_id}.")
+    def __init__(self, device_id: int, device_class: str, gpio_service: GPIOService, on_state_change):
+        super().__init__(device_id, device_class, gpio_service, on_state_change)
+        self.status = None
 
     def get_status(self) -> str:
-        """Return the current status of the garage door."""
-        status_pin = self.read_status("status")
-        return "open" if status_pin == 1 else "closed"
+        return PayloadLoader.get("motion", "detected") if self.read_status("status") else PayloadLoader.get("motion", "free")
+
+    def handle_command(self, command: str):
+        raise ValueError(f"MotionDevice is a read-only device.")

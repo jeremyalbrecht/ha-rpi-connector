@@ -28,8 +28,10 @@ class GPIOService:
 
         if not self.mock_gpio and GPIO:
             GPIO.setmode(GPIO.BCM)
-            for device in devices:
-                for gpio in device["gpio"]:
+        for device in devices:
+            for gpio in device["gpio"]:
+                logger.debug(f"Configuring pin {gpio['gpio']} as {gpio['type']} for device ID {device['id']}")
+                if not self.mock_gpio and GPIO:
                     mode = GPIO.IN if gpio["type"] == GPIOType.INPUT else GPIO.OUT
                     GPIO.setup(gpio["gpio"], mode)
                     if "default" in gpio:
@@ -39,21 +41,21 @@ class GPIOService:
     def read_pin(self, gpio: int) -> int:
         """Read the status of a GPIO pin."""
         if self.mock_gpio:
-            logger.info(f"Mock read GPIO pin {gpio}")
+            logger.debug(f"Mock read GPIO pin {gpio}")
             return 0  # Return default mock value
         return GPIO.input(gpio)
 
     def write_pin(self, gpio: int, state: str):
         """Write a state (HIGH/LOW) to a GPIO pin."""
         if self.mock_gpio:
-            logger.info(f"Mock write GPIO pin {gpio} to {state}")
+            logger.debug(f"Mock write GPIO pin {gpio} to {state}")
             return
         GPIO.output(gpio, GPIO.HIGH if state == "high" else GPIO.LOW)
 
     def toggle_pin(self, gpio: int, duration: float = 0.5):
         """Toggle a GPIO pin (HIGH -> LOW -> HIGH)."""
         if self.mock_gpio:
-            logger.info(f"Mock toggle GPIO pin {gpio}")
+            logger.debug(f"Mock toggle GPIO pin {gpio}")
             return
         GPIO.output(gpio, GPIO.LOW)
         time.sleep(duration)
@@ -61,5 +63,6 @@ class GPIOService:
 
     def cleanup(self):
         """Clean up GPIO resources."""
+        logger.debug("Cleaning up GPIO resources")
         if not self.mock_gpio and GPIO:
             GPIO.cleanup()

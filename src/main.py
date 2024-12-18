@@ -1,15 +1,18 @@
-from src.services.device_service import DeviceService
-from src.services.gpio_service import GPIOService
-from src.services.mqtt_service import MQTTService
-from src.utils.config import get_config
-from src.utils.logger import get_logger
-from src.utils.payload_loader import PayloadLoader
+import os
+from pathlib import Path
+
+from services.device_service import DeviceService
+from services.gpio_service import GPIOService
+from services.mqtt_service import MQTTService
+from utils.config import get_config
+from utils.logger import get_logger
+from utils.payload_loader import PayloadLoader
 
 
 def main():
     logger = get_logger("main")
     config = get_config()
-    PayloadLoader.load_payloads()
+    PayloadLoader.load_payloads(Path(os.getcwd(), "conf", "payloads.yaml"))
     gpio_service = GPIOService(devices=config["devices"], mock_gpio=config.get("mock_gpio", False))
 
     try:

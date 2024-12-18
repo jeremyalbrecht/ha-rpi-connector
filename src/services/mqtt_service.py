@@ -66,6 +66,7 @@ class MQTTService:
     def stop(self):
         """Stop the MQTT service and threads."""
         self.stop_event.set()
+        self.status_thread.join()
         self.client.loop_stop()
         self.client.disconnect()
         logger.info("MQTT service stopped.")

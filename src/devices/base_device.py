@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+from src.services.gpio_service import GPIOService
+
 
 class BaseDevice(ABC):
     """Abstract base class for all devices."""
@@ -56,7 +58,10 @@ class BaseDevice(ABC):
 
     def _get_gpio(self, pin_name: str) -> int:
         """Retrieve GPIO pin number by name."""
-        pin = next((gpio for gpio in self.gpio_service.devices if gpio["name"] == pin_name), None)
+        device = next((device for device in self.gpio_service.devices if device['id'] == self.device_id and device['class'] == self.device_class), None)
+        if not device:
+            raise ValueError(f"Device '{self.device_id}' not found.")
+        pin = next((gpio for gpio in device['gpio'] if gpio["name"] == pin_name), None)
         if not pin:
             raise ValueError(f"Pin '{pin_name}' not found for device {self.device_id}.")
         return pin["gpio"]
