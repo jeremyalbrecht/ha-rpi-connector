@@ -47,11 +47,10 @@ class StripDevice(BaseDevice):
 
     def animate(self):
         """Run a simple animation."""
-        while not self.stop_animation.is_set():
-            for i in range(self.custom_vars['num_leds']):
-                if self.stop_animation.is_set():
-                    break
-                self.gpio_service.set_strip_color(self._get_gpio("control"), i, (255, 0, 0))  # Red color
-                time.sleep(0.05)
-                self.gpio_service.set_strip_color(self._get_gpio("control"), i, (0, 0, 0))  # Turn off
-                time.sleep(0.05)
+        for i in range(self.custom_vars['num_leds']):
+            if self.stop_animation.is_set():
+                break
+            self.gpio_service.set_strip_color(self._get_gpio("control"), i, (255, 0, 0))  # Red color
+            time.sleep(0.05)
+            self.gpio_service.set_strip_color(self._get_gpio("control"), i, (0, 0, 0))  # Turn off
+            time.sleep(0.05)

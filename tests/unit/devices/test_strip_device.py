@@ -4,6 +4,7 @@ from src.devices.strip import StripDevice
 from src.enums.gpio_enums import GPIOType
 from src.utils.payload_loader import PayloadLoader
 
+
 class TestStripDevice(unittest.TestCase):
 
     def setUp(self):
