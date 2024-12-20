@@ -49,14 +49,14 @@ def mock_mqtt_service():
 @pytest.fixture
 def mock_device_classes():
     class MockGarageDevice:
-        def __init__(self, device_id, device_class, gpio_service, on_state_change):
+        def __init__(self, device_id, device_class, gpio_service, on_state_change, custom_vars=None):
             self.device_id = device_id
             self.device_class = device_class
             self.gpio_service = gpio_service
             self.on_state_change = on_state_change
 
     class MockMotionDevice:
-        def __init__(self, device_id, device_class, gpio_service, on_state_change):
+        def __init__(self, device_id, device_class, gpio_service, on_state_change, custom_vars=None):
             self.device_id = device_id
             self.device_class = device_class
             self.gpio_service = gpio_service

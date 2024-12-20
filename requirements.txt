@@ -4,3 +4,4 @@ pi-rc522==2.3.0
 PyYAML==6.0.2
 pytest
 pytest-mock
+rpi_ws281x

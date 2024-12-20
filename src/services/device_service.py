@@ -23,6 +23,7 @@ class DeviceService:
         for device_config in config["devices"]:
             device_class = device_config["class"]
             device_id = device_config["id"]
+            custom_vars = device_config.get("env", [])
 
             # Look up the corresponding device class
             device_type = DEVICE_CLASSES.get(device_class)
@@ -33,6 +34,7 @@ class DeviceService:
                     device_class=device_class,
                     gpio_service=gpio_service,
                     on_state_change=mqtt_service.handle_device_state_change,
+                    custom_vars=custom_vars,
                 )
                 self.devices.append(device)
             else:

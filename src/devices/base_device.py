@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 
 from src.services.gpio_service import GPIOService
 
@@ -6,7 +7,8 @@ from src.services.gpio_service import GPIOService
 class BaseDevice(ABC):
     """Abstract base class for all devices."""
 
-    def __init__(self, device_id: int, device_class: str, gpio_service: GPIOService, on_state_change):
+    def __init__(self, device_id: int, device_class: str, gpio_service: GPIOService, on_state_change: Callable,
+                 custom_vars: dict = None):
         self.device_id = device_id
         self.device_class = device_class
         self.gpio_service = gpio_service
@@ -16,6 +18,7 @@ class BaseDevice(ABC):
             "state": f"{self.device_class}/{self.device_id}/status"
         }
         self._on_state_change = on_state_change
+        self.custom_vars = custom_vars if custom_vars is not None else {}
 
     @abstractmethod
     def handle_command(self, command: str):
