@@ -1,4 +1,4 @@
-name: Python Tests and Coverage
+name: Python Tests and Integration Tests
 
 on:
   push:
@@ -11,8 +11,14 @@ on:
 
 jobs:
   test:
-    name: Run Tests and Report Coverage
+    name: Run Tests and Integration Tests
     runs-on: ubuntu-latest
+
+    services:
+      mqtt:
+        image: eclipse-mosquitto:latest
+        ports:
+          - 1883:1883
 
     steps:
     - name: Checkout code
@@ -28,12 +34,13 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements-test.txt
 
-    - name: Run tests with coverage
+    - name: Run unit tests
       run: |
-        pytest --cov=src --cov-report=html
+        pytest tests/unit --cov=src --cov-report=html
 
-    - name: Upload HTML coverage report
-      uses: actions/upload-artifact@v3
-      with:
-        name: html-coverage-report
-        path: htmlcov/
+    - name: Run integration tests
+      env:
+        MQTT_BROKER_URL: localhost
+        MQTT_BROKER_PORT: 1883
+      run: |
+        pytest tests/integration --cov=src --cov-report=html
