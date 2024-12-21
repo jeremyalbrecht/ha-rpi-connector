@@ -15,7 +15,7 @@ class BaseDevice(ABC):
         self.topics = {
             "availability": f"{self.device_class}/{self.device_id}/availability",
             "command": f"{self.device_class}/{self.device_id}/set",
-            "state": f"{self.device_class}/{self.device_id}/status"
+            "status": f"{self.device_class}/{self.device_id}/status"
         }
         self._on_state_change = on_state_change
         self.custom_vars = custom_vars if custom_vars is not None else {}

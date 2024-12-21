@@ -60,7 +60,7 @@ def test_mqtt_service_on_connect(mqtt_service, mock_mqtt_client, mock_devices):
 def test_mqtt_service_on_message(mqtt_service, mock_devices):
     """Test the `on_message` method with valid and invalid topics."""
     valid_message = Mock()
-    valid_message.topic = "command/garage/1"
+    valid_message.topic = "garage/1/set"
     valid_message.payload = b'{"action": "open"}'
 
     invalid_message = Mock()

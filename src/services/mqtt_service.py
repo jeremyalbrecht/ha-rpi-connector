@@ -47,9 +47,10 @@ class MQTTService:
 
     def on_message(self, client, userdata, msg):
         """Route incoming MQTT messages to the correct device."""
+        logger.debug("Received message: %s", msg.payload)
         topic_parts = msg.topic.split("/")
-        if len(topic_parts) == 3 and topic_parts[0] == "command":
-            _, device_class, device_id = topic_parts
+        if len(topic_parts) == 3 and topic_parts[-1] == "set":
+            device_class, device_id, _ = topic_parts
             for device in self.devices:
                 if device.device_class == device_class and str(device.device_id) == device_id:
                     device.handle_command(msg.payload.decode())
@@ -60,13 +61,15 @@ class MQTTService:
         """Start the MQTT service and the status publishing thread."""
         self.client.connect(self.host, self.port)
         self.client.loop_start()
-        self.status_thread = Thread(target=self.publish_status_periodically)
-        self.status_thread.start()
+        if self.interval > 0:
+            self.status_thread = Thread(target=self.publish_status_periodically)
+            self.status_thread.start()
 
     def stop(self):
         """Stop the MQTT service and threads."""
         self.stop_event.set()
-        self.status_thread.join()
+        if self.interval > 0:
+            self.status_thread.join()
         self.client.loop_stop()
         self.client.disconnect()
         logger.info("MQTT service stopped.")
@@ -88,7 +91,6 @@ class MQTTService:
         """Publish status at regular intervals."""
         while not self.stop_event.is_set():
             self.publish_status()
-            time.sleep(self.interval)
 
     def register_device_state_change_callback(self, device):
         """Register a state change callback for a device."""
