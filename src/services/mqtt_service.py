@@ -33,6 +33,7 @@ class MQTTService:
         self.client.username_pw_set(username, password)
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
+        self.last_status = {}
 
     def on_connect(self, client, userdata, flags, rc):
         """Handle connection to MQTT broker."""
@@ -83,7 +84,10 @@ class MQTTService:
         """Publish the current status of all devices."""
         for device in self.devices:
             status = device.get_status()
+            if device.identifier() in self.last_status and self.last_status[device.identifier()] == status:
+                continue
             topic = device.get_topic("status")
+            self.last_status[device.identifier()] = status
             self.client.publish(topic, status, retain=True, qos=2)
             logger.info(f"Published status for {device.device_class} {device.device_id}: {status}")
 
@@ -91,6 +95,7 @@ class MQTTService:
         """Publish status at regular intervals."""
         while not self.stop_event.is_set():
             self.publish_status()
+            time.sleep(self.interval)
 
     def register_device_state_change_callback(self, device):
         """Register a state change callback for a device."""
@@ -98,5 +103,5 @@ class MQTTService:
 
     def handle_device_state_change(self, device_class, device_id, status):
         """Handle a state change event from a device."""
-        topic = f"state/{device_class}/{device_id}"
+        topic = f"{device_class}/{device_id}/status"
         self.publish(topic, status)

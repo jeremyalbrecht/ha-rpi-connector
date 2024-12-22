@@ -98,7 +98,7 @@ def test_mqtt_service_handle_device_state_change(mqtt_service, mock_mqtt_client)
     mqtt_service.handle_device_state_change("garage", 1, '{"state": "open"}')
 
     mock_mqtt_client.publish.assert_called_once_with(
-        "state/garage/1", '{"state": "open"}', retain=False, qos=2
+        "garage/1/status", '{"state": "open"}', retain=False, qos=2
     )
 
 

@@ -12,7 +12,7 @@ from utils.payload_loader import PayloadLoader
 def main():
     logger = get_logger("main")
     config = get_config()
-    PayloadLoader.load_payloads(Path(os.getcwd(), "conf", "payloads.yaml"))
+    PayloadLoader.load_payloads()
     gpio_service = GPIOService(devices=config["devices"], mock_gpio=config.get("mock_gpio", False))
 
     try:

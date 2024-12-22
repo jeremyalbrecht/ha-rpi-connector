@@ -30,6 +30,9 @@ class BaseDevice(ABC):
         """Return the current status of the device."""
         pass
 
+    def identifier(self):
+        return f"{self.device_class}_{self.device_id}"
+
     def notify_state_change(self, state: str = None):
         """
         Notify the state change to the callback.

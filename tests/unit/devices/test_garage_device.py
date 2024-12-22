@@ -36,6 +36,10 @@ class TestGarageDevice(unittest.TestCase):
         )
 
     @patch.object(PayloadLoader, "get", side_effect=lambda category, key: f"{category}_{key}")
+    def test_generate_identifier(self, mock_payload_loader):
+        assert self.garage_device.identifier() == f"{self.device_class}_{self.device_id}"
+
+    @patch.object(PayloadLoader, "get", side_effect=lambda category, key: f"{category}_{key}")
     def test_handle_command_open(self, mock_payload_loader):
         # Simulate the "open" command
         self.garage_device.handle_command(PayloadLoader.get("garage", "open"))
