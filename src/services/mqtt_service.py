@@ -62,12 +62,14 @@ class MQTTService:
         """Start the MQTT service and the status publishing thread."""
         self.client.connect(self.host, self.port)
         self.client.loop_start()
+        self.publish_availability("online")
         if self.interval > 0:
             self.status_thread = Thread(target=self.publish_status_periodically)
             self.status_thread.start()
 
     def stop(self):
         """Stop the MQTT service and threads."""
+        self.publish_availability("offline")
         self.stop_event.set()
         if self.interval > 0:
             self.status_thread.join()
@@ -105,3 +107,10 @@ class MQTTService:
         """Handle a state change event from a device."""
         topic = f"{device_class}/{device_id}/status"
         self.publish(topic, status)
+
+    def publish_availability(self, state: str):
+        """Publish the availability status of all devices to Home Assistant."""
+        for device in self.devices:
+            topic = device.get_topic("availability")
+            self.publish(topic, state, retain=True)
+            logger.info(f"Published availability for {device.device_class} {device.device_id}: {state}")

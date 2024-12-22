@@ -124,3 +124,21 @@ def test_mqtt_service_publish_status_periodically(mqtt_service):
         mqtt_service.stop_event.set()  # Stop immediately
         mqtt_service.publish_status_periodically()
         mock_publish_status.assert_not_called()
+
+
+def test_mqtt_service_publish_availability(mqtt_service, mock_mqtt_client, mock_devices):
+    """Test the `publish_availability` method."""
+    # Test "online" state at startup
+    mqtt_service.publish_availability("online")
+    for device in mock_devices:
+        topic = device.get_topic("availability")
+        mock_mqtt_client.publish.assert_any_call(topic, "online", retain=True, qos=2)
+
+    # Reset the mock
+    mock_mqtt_client.publish.reset_mock()
+
+    # Test "offline" state at shutdown
+    mqtt_service.publish_availability("offline")
+    for device in mock_devices:
+        topic = device.get_topic("availability")
+        mock_mqtt_client.publish.assert_any_call(topic, "offline", retain=True, qos=2)

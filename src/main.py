@@ -1,6 +1,3 @@
-import os
-from pathlib import Path
-
 from services.device_service import DeviceService
 from services.gpio_service import GPIOService
 from services.mqtt_service import MQTTService

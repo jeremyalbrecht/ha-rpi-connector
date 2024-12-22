@@ -82,7 +82,7 @@ class TestMQTTServiceIntegration(unittest.TestCase):
             username="",
             password="",
             devices=[device],
-            interval=1  # Publish status every 2 seconds
+            interval=2  # Publish status every 2 seconds
         )
 
         # Subscribe to the device status topic
@@ -96,8 +96,8 @@ class TestMQTTServiceIntegration(unittest.TestCase):
 
         # Check if the status message was received
         status_messages = [msg for topic, msg in self.received_messages if topic == status_topic]
-        assert len(status_messages) == 1  # At least 1 messages should have been published
-        assert all(msg == device_status for msg in status_messages)  # All messages should match the status
+        assert len(status_messages) == 2  # At least 1 messages should have been published (availability + status
+        assert any(msg == device_status for msg in status_messages)
 
         service.stop()
 

@@ -1,3 +1,8 @@
+import os
+
+from importlib import import_module
+from pathlib import Path
+
 import pytest
 from unittest.mock import Mock
 from src.services.device_service import DeviceService
@@ -102,3 +107,17 @@ def test_device_service_no_devices(mock_gpio_service, mock_mqtt_service):
 
     # Ensure no devices are initialized
     assert len(service.devices) == 0
+
+def test_all_device_class_are_registered(mock_gpio_service, mock_mqtt_service):
+    devices_folder = Path(os.getcwd(), "src", "devices")
+
+    # List all Python files in the devices folder excluding __init__.py
+    device_files = [
+        f[:-3] for f in os.listdir(devices_folder)
+        if f.endswith(".py") and f not in ["__init__.py", "base_device.py"]
+    ]
+
+    # Import all device classes and check registration
+    for device_file in device_files:
+        device_class = device_file.replace(".py", "")
+        assert device_class in DEVICE_CLASSES
