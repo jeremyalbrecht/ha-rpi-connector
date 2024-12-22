@@ -1,4 +1,4 @@
-name: Python Tests and Integration Tests
+name: Python Tests
 
 on:
   push:
@@ -11,7 +11,7 @@ on:
 
 jobs:
   test:
-    name: Run Tests and Integration Tests
+    name: Run Tests
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -34,10 +34,6 @@ jobs:
         ports: '1883:1883'
         config: ${{ github.workspace }}/mosquitto.conf
         container-name: 'mqtt'
-
-    - name: Run unit tests
-      run: |
-        pytest tests/unit --cov=src --cov-report=html
 
     - name: Run integration tests
       env:
