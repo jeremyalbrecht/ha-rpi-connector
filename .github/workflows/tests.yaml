@@ -13,13 +13,6 @@ jobs:
   test:
     name: Run Tests and Integration Tests
     runs-on: ubuntu-latest
-
-    services:
-      mqtt:
-        image: eclipse-mosquitto:latest
-        ports:
-          - 1883:1883
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -34,13 +27,27 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements-test.txt
 
+    - name: Start Mosquitto
+      uses: namoshek/mosquitto-github-action@v1
+      with:
+        version: '1.6'
+        ports: '1883:1883'
+        config: ${{ github.workspace }}/mosquitto.conf
+        container-name: 'mqtt'
+
     - name: Run unit tests
       run: |
         pytest tests/unit --cov=src --cov-report=html
 
     - name: Run integration tests
       env:
-        MQTT_BROKER_URL: localhost
+        MQTT_BROKER_URL: mqtt
         MQTT_BROKER_PORT: 1883
       run: |
-        pytest tests/integration --cov=src --cov-report=html
+        pytest tests --cov=src --cov-report=html
+
+    - name: Upload HTML coverage report
+      uses: actions/upload-artifact@v3
+      with:
+        name: html-coverage-report
+        path: htmlcov/
