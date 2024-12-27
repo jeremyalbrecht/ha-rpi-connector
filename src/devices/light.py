@@ -43,7 +43,7 @@ class LightDevice(BaseDevice):
                 self.cleaning_thread.join()
 
             self.stop_flash.clear()
-            self.cleaning_thread = threading.Thread(target=self.clean_light_after, args=(payload['flash']))
+            self.cleaning_thread = threading.Thread(target=self.clean_light_after, args=(payload['flash'],))
             self.cleaning_thread.start()
 
         self.notify_state_change()
@@ -56,3 +56,4 @@ class LightDevice(BaseDevice):
             time.sleep(0.1)
         self.status = GPIOState.LOW
         self.write_status("control", self.status)
+        self.notify_state_change()
