@@ -12,8 +12,8 @@ availability:
   offline: "offline"
 
 light:
-  on: "ON"
-  off: "OFF"
+  open: "ON"
+  close: "OFF"
 
 motion:
   free: "free"

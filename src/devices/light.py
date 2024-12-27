@@ -20,16 +20,16 @@ class LightDevice(BaseDevice):
 
     def get_status(self) -> str:
         return json.dumps({
-            "state": PayloadLoader.get("light", "on") if self.status == GPIOState.HIGH else PayloadLoader.get("light", "off"),
+            "state": PayloadLoader.get("light", "open") if self.status == GPIOState.HIGH else PayloadLoader.get("light", "close"),
         })
 
     def handle_command(self, command: str):
         """Handle garage-specific commands like open/close."""
         payload = json.loads(command)
-        if payload['state'] == PayloadLoader.get("light", "on"):
+        if payload['state'] == PayloadLoader.get("light", "open"):
             self.status = GPIOState.HIGH
             self.write_status("control", self.status)
-        elif payload['state'] == PayloadLoader.get("light", "off"):
+        elif payload['state'] == PayloadLoader.get("light", "close"):
             self.status = GPIOState.LOW
             self.write_status("control", self.status)
         if 'brightness' in payload:
