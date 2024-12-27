@@ -90,32 +90,32 @@ Configuration needs to be done at two places:
 
 To use the project on a freshly installed Raspberry Pi, follow these simple steps.
 ```sh
-  git clone https://github.com/jeremyalbrecht/ha-rpi-connector
-  cd ha-rpi-connector/
-  python3 -m venv venv
-  source venv/bin/activate
-  pip install -r requirements.txt
-  cat >> conf/default.yaml <<'EOF'
+git clone https://github.com/jeremyalbrecht/ha-rpi-connector
+cd ha-rpi-connector/
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+cat >> conf/default.yaml <<'EOF'
 devices:
-  - id: 1
-    class: garage
-    gpio:
-      - name: status
-        type: input
-        gpio: 18
-      - name: control
-        type: output
-        gpio: 20
-        default: high
+- id: 1
+class: garage
+gpio:
+  - name: status
+    type: input
+    gpio: 18
+  - name: control
+    type: output
+    gpio: 20
+    default: high
 mqtt:
-  host: localhost
-  port: 1883
-  username: ""
-  password: ""
+host: localhost
+port: 1883
+username: ""
+password: ""
 mock_gpio: false
 EOF
-  export PYTHONPATH=$PWD
-  python3 src/main.py
+export PYTHONPATH=$PWD
+python3 src/main.py
   ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
