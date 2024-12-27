@@ -18,4 +18,4 @@ class GarageDevice(BaseDevice):
     def get_status(self) -> str:
         """Return the current status of the garage door."""
         status_pin = self.read_status("status")
-        return PayloadLoader.get("garage", "state_open") if status_pin == 1 else PayloadLoader.get("garage", "state_close")
+        return PayloadLoader.get("garage", "state_open") if status_pin == 1 else PayloadLoader.get("garage", "state_closed")

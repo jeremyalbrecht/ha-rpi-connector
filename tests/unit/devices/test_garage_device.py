@@ -97,7 +97,7 @@ class TestGarageDevice(unittest.TestCase):
         status = self.garage_device.get_status()
 
         # Assert the correct state is returned
-        self.assertEqual(status, "garage_state_close")
+        self.assertEqual(status, "garage_state_closed")
 
         # Assert the status pin is read
         self.mock_gpio_service.read_pin.assert_called_once_with(self.status_pin)

@@ -35,7 +35,7 @@ jobs:
         config: ${{ github.workspace }}/mosquitto.conf
         container-name: 'mqtt'
 
-    - name: Run integration tests
+    - name: Run tests
       env:
         MQTT_BROKER_URL: mqtt
         MQTT_BROKER_PORT: 1883
