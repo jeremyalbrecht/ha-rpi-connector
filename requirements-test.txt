@@ -1,7 +1,5 @@
 paho-mqtt==1.6.1
-RPi.GPIO==0.7.1
-pi-rc522==2.3.0
 PyYAML==6.0.2
 pytest
 pytest-mock
-rpi_ws281x
+pytest-cov

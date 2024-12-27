@@ -6,7 +6,7 @@ def get_logger(name: str) -> logging.Logger:
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s :: %(levelname)s :: %(message)s')
-    file_handler = RotatingFileHandler(f"{name}.log", 'a', 1000000, 1)
+    file_handler = RotatingFileHandler(f"{name}.log", 'a', 1000000, 3)
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(formatter)
     stream_handler = logging.StreamHandler()
