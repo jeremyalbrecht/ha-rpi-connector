@@ -9,9 +9,11 @@ class GarageDevice(BaseDevice):
         if command == PayloadLoader.get("garage", "open"):
             self.toggle_control("control")
             self.notify_state_change(PayloadLoader.get("garage", "state_opening"))
+            self.delay_updates(7)
         elif command == PayloadLoader.get("garage", "close"):
             self.toggle_control("control")
             self.notify_state_change(PayloadLoader.get("garage", "state_closing"))
+            self.delay_updates(7)
         else:
             raise ValueError(f"Unknown command '{command}' for GarageDevice {self.device_id}.")
 

@@ -2,16 +2,18 @@ from abc import ABC, abstractmethod
 from collections.abc import Callable
 
 from src.services.gpio_service import GPIOService
+from src.services.mqtt_service import MQTTService
 
 
 class BaseDevice(ABC):
     """Abstract base class for all devices."""
 
-    def __init__(self, device_id: int, device_class: str, gpio_service: GPIOService, on_state_change: Callable,
-                 custom_vars: dict = None):
+    def __init__(self, device_id: int, device_class: str, gpio_service: GPIOService, mqtt_service: MQTTService,
+                 on_state_change: Callable, custom_vars: dict = None):
         self.device_id = device_id
         self.device_class = device_class
         self.gpio_service = gpio_service
+        self.mqtt_service = mqtt_service
         self.topics = {
             "availability": f"{self.device_class}/{self.device_id}/availability",
             "command": f"{self.device_class}/{self.device_id}/set",
@@ -29,6 +31,9 @@ class BaseDevice(ABC):
     def get_status(self) -> str:
         """Return the current status of the device."""
         pass
+
+    def delay_updates(self, delay_seconds: int):
+        self.mqtt_service.delay_updates(self.identifier(), delay_seconds)
 
     def identifier(self):
         return f"{self.device_class}_{self.device_id}"

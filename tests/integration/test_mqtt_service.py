@@ -37,19 +37,21 @@ class TestMQTTServiceIntegration(unittest.TestCase):
         command_topic = "garage/1/set"
         command_payload = "toggle"
 
-        # Create a device mock or instance
-        device = GarageDevice(1, "garage", self.gpio_service, Mock())
-        device.handle_command = Mock(return_value=None)
-
         # Setup service with the device
         service = MQTTService(
             host=MQTT_BROKER_URL,
             port=MQTT_BROKER_PORT,
             username="",
             password="",
-            devices=[device],
+            devices=[],
             interval=0
         )
+
+        # Create a device mock or instance
+        device = GarageDevice(1, "garage", self.gpio_service, service, Mock())
+        device.handle_command = Mock(return_value=None)
+
+        service.devices = [device]
 
         # Subscribe to the device command topic
         self.mqtt_client.subscribe(command_topic, qos=2)
@@ -70,20 +72,22 @@ class TestMQTTServiceIntegration(unittest.TestCase):
         status_topic = "garage/1/status"
         device_status = "OPEN"
 
-        # Create a device mock or instance
-        device = GarageDevice(1, "garage", self.gpio_service, Mock())
-        device.get_status = Mock(return_value=device_status)
-        device.get_topic = Mock(return_value=status_topic)
-
         # Setup service with the device
         service = MQTTService(
             host=MQTT_BROKER_URL,
             port=MQTT_BROKER_PORT,
             username="",
             password="",
-            devices=[device],
+            devices=[],
             interval=2  # Publish status every 2 seconds
         )
+
+        # Create a device mock or instance
+        device = GarageDevice(1, "garage", self.gpio_service, service, Mock())
+        device.get_status = Mock(return_value=device_status)
+        device.get_topic = Mock(return_value=status_topic)
+
+        service.devices = [device]
 
         # Subscribe to the device status topic
         self.mqtt_client.subscribe(status_topic, qos=2)

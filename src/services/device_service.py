@@ -33,6 +33,7 @@ class DeviceService:
                     device_id=device_id,
                     device_class=device_class,
                     gpio_service=gpio_service,
+                    mqtt_service=mqtt_service,
                     on_state_change=mqtt_service.handle_device_state_change,
                     custom_vars=custom_vars,
                 )

@@ -9,6 +9,7 @@ class TestGarageDevice(unittest.TestCase):
     def setUp(self):
         # Mock GPIOService and state change callback
         self.mock_gpio_service = Mock()
+        self.mock_mqtt_service = Mock()
 
         # Device configuration
         self.device_id = 1
@@ -32,6 +33,7 @@ class TestGarageDevice(unittest.TestCase):
             device_id=self.device_id,
             device_class=self.device_class,
             gpio_service=self.mock_gpio_service,
+            mqtt_service=self.mock_mqtt_service,
             on_state_change=self.mock_state_change_callback,
         )
 
@@ -101,6 +103,19 @@ class TestGarageDevice(unittest.TestCase):
 
         # Assert the status pin is read
         self.mock_gpio_service.read_pin.assert_called_once_with(self.status_pin)
+
+    @patch.object(PayloadLoader, "get", side_effect=lambda category, key: f"{category}_{key}")
+    def test_handle_command_close(self, mock_payload_loader):
+        # Simulate the "close" command
+        self.garage_device.handle_command(PayloadLoader.get("garage", "close"))
+
+        # Assert that the GPIO control pin is toggled
+        self.mock_gpio_service.toggle_pin.assert_called_once_with(self.control_pin, 0.5)
+
+        # Assert that state change is notified
+        self.mock_state_change_callback.assert_called_once_with(
+            self.device_class, self.device_id, "garage_state_closing"
+        )
 
     def test_notify_state_change(self):
         # Call notify_state_change with a specific state

@@ -54,17 +54,19 @@ def mock_mqtt_service():
 @pytest.fixture
 def mock_device_classes():
     class MockGarageDevice:
-        def __init__(self, device_id, device_class, gpio_service, on_state_change, custom_vars=None):
+        def __init__(self, device_id, device_class, gpio_service, mqtt_service, on_state_change, custom_vars=None):
             self.device_id = device_id
             self.device_class = device_class
             self.gpio_service = gpio_service
+            self.mqtt_service = mqtt_service
             self.on_state_change = on_state_change
 
     class MockMotionDevice:
-        def __init__(self, device_id, device_class, gpio_service, on_state_change, custom_vars=None):
+        def __init__(self, device_id, device_class, gpio_service, mqtt_service, on_state_change, custom_vars=None):
             self.device_id = device_id
             self.device_class = device_class
             self.gpio_service = gpio_service
+            self.mqtt_service = mqtt_service
             self.on_state_change = on_state_change
 
     DEVICE_CLASSES["garage"] = MockGarageDevice
@@ -82,12 +84,14 @@ def test_device_service_initialization(sample_config, mock_gpio_service, mock_mq
     assert garage_device.device_id == 1
     assert garage_device.device_class == "garage"
     assert garage_device.gpio_service == mock_gpio_service
+    assert garage_device.mqtt_service == mock_mqtt_service
     assert garage_device.on_state_change == mock_mqtt_service.handle_device_state_change
 
     motion_device = service.devices[2]
     assert motion_device.device_id == 3
     assert motion_device.device_class == "motion"
     assert motion_device.gpio_service == mock_gpio_service
+    assert  motion_device.mqtt_service == mock_mqtt_service
     assert motion_device.on_state_change == mock_mqtt_service.handle_device_state_change
 
 

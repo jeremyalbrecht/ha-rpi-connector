@@ -10,6 +10,7 @@ class TestMotionDevice(unittest.TestCase):
     def setUp(self):
         # Mock GPIOService and state change callback
         self.mock_gpio_service = Mock()
+        self.mock_mqtt_service = Mock()
 
         # Device configuration
         self.status_pin = 3
@@ -32,6 +33,7 @@ class TestMotionDevice(unittest.TestCase):
             device_id=self.device_id,
             device_class=self.device_class,
             gpio_service=self.mock_gpio_service,
+            mqtt_service=self.mock_mqtt_service,
             on_state_change=self.mock_state_change_callback,
         )
 

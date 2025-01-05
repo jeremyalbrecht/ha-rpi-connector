@@ -1,4 +1,6 @@
 import logging
+from datetime import datetime, timedelta
+
 import paho.mqtt.client as mqtt
 import time
 import socket
@@ -29,6 +31,7 @@ class MQTTService:
 
         self.client = mqtt.Client(client_id=socket.gethostname(), clean_session=False)
         self.stop_event = Event()
+        self.delay_end_times = {}
 
         self.client.username_pw_set(username, password)
         self.client.on_connect = self.on_connect
@@ -77,6 +80,11 @@ class MQTTService:
         self.client.disconnect()
         logger.info("MQTT service stopped.")
 
+    def delay_updates(self, device_identifier: str, delay_seconds: int):
+        """Delay updates for a specific device for a given amount of time."""
+        self.delay_end_times[device_identifier] = datetime.now() + timedelta(seconds=delay_seconds)
+        logger.info(f"Updates for device {device_identifier} delayed for {delay_seconds} seconds.")
+
     def publish(self, topic: str, payload: str, retain: bool = False):
         """Publish a message to a specific topic."""
         self.client.publish(topic, payload, retain=retain, qos=2)
@@ -85,6 +93,8 @@ class MQTTService:
     def publish_status(self):
         """Publish the current status of all devices."""
         for device in self.devices:
+            if device.identifier() in self.delay_end_times and datetime.now() < self.delay_end_times[device.identifier()]:
+                continue
             status = device.get_status()
             if device.identifier() in self.last_status and self.last_status[device.identifier()] == status:
                 continue
@@ -105,6 +115,9 @@ class MQTTService:
 
     def handle_device_state_change(self, device_class, device_id, status):
         """Handle a state change event from a device."""
+        identifier = f"{device_class}_{device_id}"
+        if identifier in self.delay_end_times and datetime.now() < self.delay_end_times[identifier]:
+            return
         topic = f"{device_class}/{device_id}/status"
         self.publish(topic, status)
 
